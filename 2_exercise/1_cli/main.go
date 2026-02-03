@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"log"
@@ -17,19 +16,26 @@ func main() {
 	// Parsing Flag
 	flag.Parse()
 
+	// Scanner
+	handler := NewInputHandler()
+
 	var fileName string
 
 	if *fileFlag != "" {
 		fileName = *fileFlag
 	} else {
 		// no flag input
-		fileName = scanShortText("Which file will you read? ")
+		fileName = handler.Ask("Which file will you read? ")
 	}
 
 	ascVal := *ascFlag
 
 	// Trimming Space in file name text
 	fileName = strings.TrimSpace(fileName)
+
+	if fileName == "" {
+		log.Fatal("No Input")
+	}
 
 	// Read file
 	data, err := os.ReadFile(fileName)
@@ -48,25 +54,4 @@ func main() {
 
 	os.Stdout.Write(data)
 	fmt.Println() // Prevent '%' letter end of output
-}
-
-func scanShortText(info string) string {
-	scanner := bufio.NewScanner(os.Stdin)
-
-	fmt.Printf("%v > ", info)
-
-	if !scanner.Scan() {
-		if err := scanner.Err(); err != nil {
-			log.Fatal(err)
-		}
-		log.Fatal("No Input")
-	}
-
-	inputText := scanner.Text()
-
-	if inputText == "" {
-		log.Fatal("no input")
-	}
-
-	return inputText
 }
