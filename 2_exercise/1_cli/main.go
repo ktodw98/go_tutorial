@@ -2,15 +2,17 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"strings"
+	"sync"
 )
 
 func main() {
 	// Define Flag
 	fileFlag := flag.String("file", "example-big.txt", "File route")
 	ascFlag := flag.Bool("asc", true, "whether print out in ascending order")
-	modeFlag := flag.String("mode", "all", "all, line")
+	modeFlag := flag.String("mode", "line", "all, line")
 
 	// Parsing Flag
 	flag.Parse()
@@ -44,5 +46,27 @@ func main() {
 		log.Fatal("No Input")
 	}
 
-	processFileData(filePath, ascVal, mode)
+	progressChan := make(chan int64)
+
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		processFileData(filePath, ascVal, mode, progressChan)
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		var totalRead int64
+		for n := range progressChan {
+			totalRead += n
+			fmt.Printf("Total Read: %v", totalRead)
+			fmt.Println()
+		}
+
+	}()
+
+	wg.Wait()
 }

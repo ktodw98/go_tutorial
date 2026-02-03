@@ -7,7 +7,8 @@ import (
 	"os"
 )
 
-func processFileData(filePath string, ascVal bool, mode string) {
+func processFileData(filePath string, ascVal bool, mode string, progressChan chan<- int64) {
+	defer close(progressChan)
 
 	// Read file
 	file, err := os.Open(filePath)
@@ -29,11 +30,15 @@ func processFileData(filePath string, ascVal bool, mode string) {
 
 	for fileScanner.Scan() {
 		data := fileScanner.Text()
+
+		// send to chan how many bytes read now
+		progressChan <- int64(len(fileScanner.Bytes()))
+
 		if !ascVal {
 			data = reverseString(data)
 		}
 
-		fmt.Printf(data)
+		// fmt.Printf(data)
 	}
 
 	if err := fileScanner.Err(); err != nil {
