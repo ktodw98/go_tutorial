@@ -12,17 +12,25 @@ import (
 func main() {
 	// Define Flag
 	fileFlag := flag.String("file", "", "File route")
+	ascFlag := flag.Bool("asc", true, "whether print out in ascending order")
 
 	// Parsing Flag
 	flag.Parse()
 
 	var fileName string
+	var ascVal bool
 
 	if *fileFlag != "" {
 		fileName = *fileFlag
 	} else {
 		// no flag input
 		fileName = scanShortText("Which file will you read? ")
+	}
+
+	if *ascFlag {
+		ascVal = true
+	} else {
+		ascVal = false
 	}
 
 	// Trimming Space in file name text
@@ -32,6 +40,14 @@ func main() {
 	data, err := os.ReadFile(fileName)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if !ascVal {
+		reversed := make([]byte, 0)
+		for i := len(data) - 1; i >= 0; i = i - 1 {
+			reversed = append(reversed, data[i])
+		}
+		data = reversed
 	}
 
 	os.Stdout.Write(data)
