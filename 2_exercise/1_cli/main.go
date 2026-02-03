@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"sync"
 )
@@ -46,27 +47,44 @@ func main() {
 		log.Fatal("No Input")
 	}
 
-	progressChan := make(chan int64)
+	// Read file
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	info, _ := file.Stat()
+	totalSize := info.Size()
+
+	progressChan := make(chan int64, 10)
+
+	pReader := &progressReader{
+		Reader: file,
+		Total:  totalSize,
+		pChan:  progressChan,
+	}
 
 	var wg sync.WaitGroup
-
 	wg.Add(1)
+
 	go func() {
 		defer wg.Done()
-		processFileData(filePath, ascVal, mode, progressChan)
-	}()
+		for current := range progressChan {
+			percent := float64(current) / float64(totalSize) * 100
 
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		var totalRead int64
-		for n := range progressChan {
-			totalRead += n
-			fmt.Printf("Total Read: %v", totalRead)
-			fmt.Println()
+			if percent > 100 {
+				percent = 100
+			}
+
+			fmt.Fprintf(os.Stderr, "\rprocessing: %.2f%% (%d/%d)", percent, current, pReader.Total)
+
 		}
-
 	}()
+
+	processFileData(pReader, ascVal, mode)
+	close(progressChan)
 
 	wg.Wait()
+	fmt.Println("\nFinished")
 }

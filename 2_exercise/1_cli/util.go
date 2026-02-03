@@ -3,21 +3,12 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
+	"io"
 	"os"
 )
 
-func processFileData(filePath string, ascVal bool, mode string, progressChan chan<- int64) {
-	defer close(progressChan)
-
-	// Read file
-	file, err := os.Open(filePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-
-	fileScanner := bufio.NewScanner(file)
+func processFileData(reader io.Reader, ascVal bool, mode string) {
+	fileScanner := bufio.NewScanner(reader)
 
 	switch mode {
 	case "all":
@@ -31,9 +22,6 @@ func processFileData(filePath string, ascVal bool, mode string, progressChan cha
 	for fileScanner.Scan() {
 		data := fileScanner.Text()
 
-		// send to chan how many bytes read now
-		progressChan <- int64(len(fileScanner.Bytes()))
-
 		if !ascVal {
 			data = reverseString(data)
 		}
@@ -44,8 +32,6 @@ func processFileData(filePath string, ascVal bool, mode string, progressChan cha
 	if err := fileScanner.Err(); err != nil {
 		fmt.Fprintln(os.Stderr, "Error while Scanning:", err)
 	}
-
-	fmt.Println() // Prevent '%' letter end of output
 }
 
 func reverseString(data string) string {
