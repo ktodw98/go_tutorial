@@ -5,27 +5,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 )
 
 func main() {
 
 	// Get user input for filename
-	scanner := bufio.NewScanner(os.Stdin)
-	fmt.Println("Which file will you read?")
-
-	if !scanner.Scan() {
-		if err := scanner.Err(); err != nil {
-			log.Fatal(err)
-		}
-		log.Fatal("No input")
-	}
-
-	link := strings.TrimSpace(scanner.Text())
-
-	if link == "" {
-		log.Fatal("No input")
-	}
+	link := scanShortText("Which file will you read?")
 
 	// Read file
 	data, err := os.ReadFile(link)
@@ -35,4 +20,25 @@ func main() {
 
 	os.Stdout.Write(data)
 	fmt.Println() // Prevent '%' letter end of output
+}
+
+func scanShortText(info string) string {
+	scanner := bufio.NewScanner(os.Stdin)
+
+	fmt.Printf("%v > ", info)
+
+	if !scanner.Scan() {
+		if err := scanner.Err(); err != nil {
+			log.Fatal(err)
+		}
+		log.Fatal("No Input")
+	}
+
+	inputText := scanner.Text()
+
+	if inputText == "" {
+		log.Fatal("no input")
+	}
+
+	return inputText
 }
