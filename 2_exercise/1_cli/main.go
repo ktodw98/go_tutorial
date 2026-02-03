@@ -18,7 +18,6 @@ func main() {
 	flag.Parse()
 
 	var fileName string
-	var ascVal bool
 
 	if *fileFlag != "" {
 		fileName = *fileFlag
@@ -27,11 +26,7 @@ func main() {
 		fileName = scanShortText("Which file will you read? ")
 	}
 
-	if *ascFlag {
-		ascVal = true
-	} else {
-		ascVal = false
-	}
+	ascVal := *ascFlag
 
 	// Trimming Space in file name text
 	fileName = strings.TrimSpace(fileName)
@@ -43,9 +38,9 @@ func main() {
 	}
 
 	if !ascVal {
-		reversed := make([]byte, 0)
+		reversed := make([]byte, len(data))
 		for i := len(data) - 1; i >= 0; i = i - 1 {
-			reversed = append(reversed, data[i])
+			reversed[i] = data[len(data)-1-i]
 		}
 		data = reversed
 	}
