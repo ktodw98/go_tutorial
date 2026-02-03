@@ -38,11 +38,12 @@ func main() {
 	}
 
 	if !ascVal {
-		reversed := make([]byte, len(data))
-		for i := len(data) - 1; i >= 0; i = i - 1 {
-			reversed[i] = data[len(data)-1-i]
+		runes := []rune(string(data))
+		n := len(runes)
+		for i, j := 0, n-1; i < j; i, j = i+1, j-1 {
+			runes[i], runes[j] = runes[j], runes[i]
 		}
-		data = reversed
+		data = []byte(string(runes))
 	}
 
 	os.Stdout.Write(data)
