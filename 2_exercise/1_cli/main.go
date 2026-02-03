@@ -2,18 +2,34 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"os"
+	"strings"
 )
 
 func main() {
+	// Define Flag
+	fileFlag := flag.String("file", "", "File route")
 
-	// Get user input for filename
-	link := scanShortText("Which file will you read?")
+	// Parsing Flag
+	flag.Parse()
+
+	var fileName string
+
+	if *fileFlag != "" {
+		fileName = *fileFlag
+	} else {
+		// no flag input
+		fileName = scanShortText("Which file will you read? ")
+	}
+
+	// Trimming Space in file name text
+	fileName = strings.TrimSpace(fileName)
 
 	// Read file
-	data, err := os.ReadFile(link)
+	data, err := os.ReadFile(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
